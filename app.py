@@ -1,30 +1,20 @@
+import os
+import gdown
+import tensorflow as tf
 import streamlit as st
 from PIL import Image
 import numpy as np
-import tensorflow as tf
-import requests
-import os
 
-# Function to download the model from Google Drive
-def download_file_from_google_drive(url, destination):
-    response = requests.get(url, stream=True)
-    if response.status_code == 200:
-        with open(destination, "wb") as file:
-            for chunk in response.iter_content(chunk_size=1024):
-                if chunk:
-                    file.write(chunk)
-    else:
-        raise Exception("Failed to download the file")
-
-# Google Drive file download link
-google_drive_link = 'https://drive.google.com/uc?id=1xWPWU4YaqTQlFVqcvfM7XL-oigWG7KUX&export=download'
-
-# Path to save the downloaded model
+# Google Drive file ID and model path
+file_id = '1xWPWU4YaqTQlFVqcvfM7XL-oigWG7KUX'
 model_path = 'best_model.keras'
 
-# Download the file
-if not os.path.exists(model_path):  # Only download if the file doesn't exist
-    download_file_from_google_drive(google_drive_link, model_path)
+# Google Drive download URL
+download_url = f'https://drive.google.com/uc?id={file_id}'
+
+# Download the model from Google Drive if it doesn't exist locally
+if not os.path.exists(model_path):
+    gdown.download(download_url, model_path, quiet=False)
 
 # Load the model
 model = tf.keras.models.load_model(model_path)
@@ -51,14 +41,11 @@ if uploaded_file is not None:
     st.image(image, caption='Uploaded Image', use_column_width=True)
     st.write("Classifying...")
 
-    # Preprocess the image for both models
+    # Preprocess the image for the model
     processed_image = preprocess_image(image, target_size=(224, 224))
-    
-    # Duplicate the input for both EfficientNet and ConvNeXt (since both expect the same input)
-    model_inputs = [processed_image, processed_image]
 
     # Make prediction
-    prediction = model.predict(model_inputs)
+    prediction = model.predict(processed_image)
     prediction = np.squeeze(prediction)  # Remove batch dimension
 
     # Interpret the results
