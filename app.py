@@ -1,9 +1,10 @@
-import os
-import gdown
-import tensorflow as tf
 import streamlit as st
+import tensorflow as tf
 from PIL import Image
 import numpy as np
+import io
+import gdown
+import os
 
 # Google Drive file ID and model path
 file_id = '1xWPWU4YaqTQlFVqcvfM7XL-oigWG7KUX'
@@ -30,7 +31,7 @@ def preprocess_image(image, target_size=(224, 224)):
         image = image.convert("RGB")
     image = image.resize(target_size)
     image = np.array(image)
-    image = image / 255.0  # Normalize to [0, 1] range
+    image = image / 255.0
     image = np.expand_dims(image, axis=0)
     return image
 
